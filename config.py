@@ -1,9 +1,15 @@
 import os
 import cv2
 import socket
+import sys
 
+def get_running_mode():
+    if len(sys.argv) < 2:
+        return 'client'
+    return sys.argv[1]
+    
 class Config:
-    WHAT_AM_I = "server"
+    WHAT_AM_I = "client"
 
     CONTROL_PORT = 12345 # for sa and as
     DATA_PORT = 12346 # for video stream
@@ -34,6 +40,7 @@ class Config:
         if self.__initialized: return
         self.__initialized = True
 
+        self.WHAT_AM_I = get_running_mode()
 
         if(not os.path.exists(self.TEMP_DIR)): 
             os.mkdir(self.TEMP_DIR)

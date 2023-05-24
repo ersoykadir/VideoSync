@@ -1,6 +1,7 @@
 from threading import Thread
 from communication import udp_broadcast
-from server import Server
+from connection import Connection
+
 
 def input_listener():
     while True:
@@ -9,7 +10,7 @@ def input_listener():
         try:
             if data == "list":
                 udp_broadcast()
-                print("Current addresses: ", Server().connected_ips)
+                print("Current addresses: ", Connection().connected_ips)
             else:
                 print("Invalid command!")
         except Exception as e:

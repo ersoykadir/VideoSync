@@ -6,10 +6,9 @@ from threading import Thread
 from utils.send_packet import send_packet
 from config import Config
 from utils import invertible_dict, video_recorder
-
+from connection import Connection
 
 class Server:
-    connected_ips = invertible_dict.InvertibleDict()
     currently_recording = False
 
     def __new__(cls):
@@ -41,7 +40,7 @@ class Server:
                 print("Server:","\tStopping recording!")
                 break
 
-            if len(Server().connected_ips) == 0:
+            if len(Connection().connected_ips) == 0:
                 # print("Server:","\tNo connected clients, waiting!")
                 time.sleep(1) # wait for 1 second and check again
                 continue
@@ -55,7 +54,7 @@ class Server:
         file_bytes = f.read()
         f.close()
 
-        for ip in self.connected_ips.keys():
+        for ip in Connection().connected_ips.keys():
             send_packet(ip, Config().DATA_PORT, file_bytes)
 
     def stop_recording(self):

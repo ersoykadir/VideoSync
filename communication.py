@@ -1,13 +1,12 @@
 import json
 import select
 import socket
-from threading import Thread
 import time
+from threading import Thread
 
 from config import Config
-from server import Server
+from connection import Connection
 from utils.send_packet import send_packet
-
 
 hello_template = {"type": "hello", "myname": Config().NAME}
 
@@ -49,8 +48,8 @@ def udp_listen():
             aleykumselam_message = aleykumselam_message.encode("utf-8")
             send_packet(sender_ip, Config().CONTROL_PORT, aleykumselam_message)
             # add to addresses
-            Server().connected_ips[sender_ip] = message["myname"]
-            print("Current addresses: ", Server().connected_ips)
+            Connection().connected_ips[sender_ip] = message["myname"]
+            print("Current addresses: ", Connection().connected_ips)
         except Exception as e:
             print("What the hack is this, udp?", e)
 
@@ -77,7 +76,7 @@ def tcp_listen():
                     if message["type"] == "aleykumselam":
                         print(f"{message['myname']} says aleykumselam")
                         # save the ip address in a dictionary
-                        Server().connected_ips[sender_ip] = message["myname"]
+                        Connection().connected_ips[sender_ip] = message["myname"]
                     else:
                         print("Invalid message type!")
             except Exception as e:
