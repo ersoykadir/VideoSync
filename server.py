@@ -29,25 +29,25 @@ class Server:
         self.currently_recording = True
 
     def start_recording(self):
-        if Server.currently_recording:
+        if Server().currently_recording:
             print("Server:","\tAlready recording!")
             return
 
-        Server.currently_recording = True
+        Server().currently_recording = True
         print("Server:","\tStarting recording!")
 
         while True:
-            if Server.currently_recording == False:
+            if Server().currently_recording == False:
                 print("Server:","\tStopping recording!")
                 break
 
-            if len(Server.connected_ips) == 0:
+            if len(Server().connected_ips) == 0:
                 # print("Server:","\tNo connected clients, waiting!")
                 time.sleep(1) # wait for 1 second and check again
                 continue
 
             recorded_file = video_recorder.record()
-            Thread(target=Server.send_video_to_users, args=(recorded_file,)).start()
+            Thread(target=Server().send_video_to_users, args=(recorded_file,)).start()
             
             
     def send_video_to_users(self, recorded_file):
@@ -60,6 +60,3 @@ class Server:
 
     def stop_recording(self):
         self.currently_recording = False
-
-# first initialization of the singleton class, the same instance will be used in all other imports
-Server()

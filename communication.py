@@ -49,8 +49,8 @@ def udp_listen():
             message = message.encode("utf-8")
             send_packet(sender_ip, Config().CONTROL_PORT, message)
             # add to addresses
-            Server.connected_ips[sender_ip] = message["myname"]
-            print("Current addresses: ", Server.connected_ips)
+            Server().connected_ips[sender_ip] = message["myname"]
+            print("Current addresses: ", Server().connected_ips)
         except Exception as e:
             print("What the hack is this?", e)
 
@@ -77,7 +77,7 @@ def tcp_listen():
                     if message["type"] == "aleykumselam":
                         print(f"{message['myname']} says aleykumselam")
                         # save the ip address in a dictionary
-                        Server.connected_ips[sender_ip] = message["myname"]
+                        Server().connected_ips[sender_ip] = message["myname"]
                     else:
                         print("Invalid message type!")
             except Exception as e:

@@ -50,5 +50,3 @@ class Client:
                 except Exception as e:
                     print("Client:","\tError in listening", e)
                     continue
-
-Client()

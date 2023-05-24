@@ -9,7 +9,7 @@ def input_listener():
         try:
             if data == "list":
                 udp_broadcast()
-                print("Current addresses: ", Server.connected_ips)
+                print("Current addresses: ", Server().connected_ips)
             else:
                 print("Invalid command!")
         except Exception as e:

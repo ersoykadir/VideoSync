@@ -43,5 +43,3 @@ class Config:
             print("WSL detected, using static ip!")
             self.MY_IP = '192.168.1.59'
         print("My ip is: ", self.MY_IP)
-    
-Config()
