@@ -29,6 +29,7 @@ class Client:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((Config().MY_IP, Config().DATA_PORT))
             s.listen()
+            start = time.perf_counter()
             while True:
                 try:
                     conn, addr = s.accept()
@@ -47,6 +48,8 @@ class Client:
                         filetodown.write(data)
                         filetodown.close()
                         self.play_video(filename)
+                        print("It took", time.perf_counter()-start)
+                        start = time.perf_counter()
                 except Exception as e:
                     print("Client:","\tError in listening", e)
                     continue
