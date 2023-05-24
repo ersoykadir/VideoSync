@@ -7,7 +7,8 @@ import numpy as np
 from mss import mss
 
 from config import Config
-from utils import compress_video, perfect_sleep
+from utils import compress_video
+from utils.perfect_sleep import perfect_sleep
 
 
 def record(fps = Config().VIDEO_FPS):
