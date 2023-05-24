@@ -45,14 +45,14 @@ def udp_listen():
                 continue
             print(f"{message['myname']} says hello!")
             # send aleykumselam message
-            message = json.dumps(aleykumselam_template)
-            message = message.encode("utf-8")
-            send_packet(sender_ip, Config().CONTROL_PORT, message)
+            aleykumselam_message = json.dumps(aleykumselam_template)
+            aleykumselam_message = aleykumselam_message.encode("utf-8")
+            send_packet(sender_ip, Config().CONTROL_PORT, aleykumselam_message)
             # add to addresses
             Server().connected_ips[sender_ip] = message["myname"]
             print("Current addresses: ", Server().connected_ips)
         except Exception as e:
-            print("What the hack is this?", e)
+            print("What the hack is this, udp?", e)
 
 
 def tcp_listen():
@@ -81,7 +81,7 @@ def tcp_listen():
                     else:
                         print("Invalid message type!")
             except Exception as e:
-                print("What the hack is this?", str(e))
+                print("What the hack is this, tcp?", str(e))
                 continue
 
 
