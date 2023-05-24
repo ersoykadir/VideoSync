@@ -4,11 +4,13 @@ import time
 from threading import Thread
 
 from utils.send_packet import send_packet
+
 from config import Config
-from utils import video_recorder
+from utils import video_recorder,perfect_sleep
 from connection import Connection
 
 class Server:
+    last = time.perf_counter()
     currently_recording = False
 
     def __new__(cls):
@@ -49,6 +51,13 @@ class Server:
             
             
     def send_video_to_users(self, recorded_file):
+        # perfect_sleep.perfect_sleep(2) # wait for 1 second and check again
+        s = time.perf_counter()
+        time.sleep(2)
+        print(time.perf_counter()-s)
+        print(time.perf_counter()-Server().last)
+        Server().last = time.perf_counter()
+
         f = open(recorded_file, 'rb')
         file_bytes = f.read()
         f.close()

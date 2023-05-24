@@ -31,7 +31,6 @@ class Config:
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
-            print('init init')
             cls.instance = object.__new__(cls)
             cls.instance.__initialized = False
         return cls.instance
@@ -48,5 +47,5 @@ class Config:
         if self.MY_IP == '127.0.0.1':
             # Static ip used for virtual machines like wsl, since host ip is not accessible
             print("WSL detected, using static ip!")
-            self.MY_IP = '192.168.1.59'
+            self.MY_IP = '192.168.1.252'
         print("My ip is: ", self.MY_IP)
