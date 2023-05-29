@@ -8,11 +8,30 @@ from utils.send_packet import send_packet
 from config import Config
 from utils import video_recorder,perfect_sleep
 from connection import Connection
+from itertools import combinations
+
+clients = ['c1','c2','server']
+
+class SyncManager:
+    client_delays = {}
+    equations = {x: [] for x in combinations(clients,2)}
+
+    def solve():
+        pass
+    
+    def update(self, sender_name: str, receiver_name: str, delay:float,):
+        naming_tuple = (sender_name, receiver_name) if sender_name < receiver_name else (receiver_name, sender_name)
+        if naming_tuple not in self.equations:
+            raise Exception('Ha Bu Kimdur, Hacen?', str(naming_tuple))
+        self.equations[naming_tuple].append(delay)
+
+
 
 class Server:
     last = time.perf_counter()
     currently_recording = False
-
+    syncManager = SyncManager()
+    
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = object.__new__(cls)

@@ -6,6 +6,7 @@ from threading import Thread
 
 from config import Config
 from connection import Connection
+from server import Server
 from utils.send_packet import send_packet
 
 hello_template = {"type": "hello", "myname": Config().NAME}
@@ -68,6 +69,13 @@ def tcp_listen():
                     if not line:
                         continue
                     message = line.strip().decode("utf-8")
+                    if message[0] == '_': # send a response as soon as possibl
+                        conn.sendall("_".encode())
+                        continue
+                    if message[0] == '#': # client has send a probe data
+                        client_name = Connection().connected_ips[sender_ip]
+                        _, receiver_name, delay = message.split('#')
+                        Server().syncManager.update(client_name, receiver_name, delay)
                     try:
                         message = json.loads(message)
                     except:
@@ -75,6 +83,7 @@ def tcp_listen():
                         continue
                     if message["type"] == "aleykumselam":
                         print(f"{message['myname']} says aleykumselam")
+                        # l = conn.recv(1024)
                         # save the ip address in a dictionary
                         Connection().connected_ips[sender_ip] = message["myname"]
                     else:
@@ -84,6 +93,38 @@ def tcp_listen():
                 continue
 
 
+def sync_delay():
+    while True:
+        try:
+            for client_name in Connection().connected_ips.inv.keys():
+                if client_name == 'server': continue
+
+                ip_of_client = Connection().connected_ips.inv[client_name]
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect((ip_of_client, Config().CONTROL_PORT))
+                
+                first_time = time.time()
+                sock.sendall("_".encode()) # message does not matter
+                _ = sock.recv(1024)
+                second_time = time.time()
+                me_to_client_delay = (second_time - first_time)*1000/2
+
+                print(f"{client_name=} {me_to_client_delay=} in ms")
+
+                # send to server if necessary
+                if Config().NAME == 'server':
+                    Server().syncManager.update('server', client_name, me_to_client_delay)
+                else:
+                    send_to_server(client_name, me_to_client_delay)
+                    
+
+
+        except Exception as e:
+            continue
+        time.sleep(5)
+
+def send_to_server(me, other, delay):
+    pass
 def udp_broadcast_interval():
     while True:
         udp_broadcast()
@@ -100,3 +141,6 @@ def startup():
 
     udp_broadcast_thread = Thread(target=udp_broadcast_interval)
     udp_broadcast_thread.start()
+
+    sync_delay_thread = Thread(target=sync_delay)
+    sync_delay_thread.start()

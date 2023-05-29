@@ -23,7 +23,7 @@ class Config:
     FILE_EXTENSION = ".mp4"
     COMPRESSION_ENABLED = False
 
-    NAME = 'kadir'
+    NAME = 'c1'
 
     TEMP_DIR = "temp"
     MY_IP = None
