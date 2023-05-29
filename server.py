@@ -53,8 +53,7 @@ class Server:
     def send_video_to_users(self, recorded_file):
         # perfect_sleep.perfect_sleep(2) # wait for 1 second and check again
         s = time.perf_counter()
-        time.sleep(2)
-        print(time.perf_counter()-s)
+        time.sleep(0.5)
         print(time.perf_counter()-Server().last)
         Server().last = time.perf_counter()
 

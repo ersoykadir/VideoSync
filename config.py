@@ -15,7 +15,7 @@ class Config:
     DATA_PORT = 12346 # for video stream
 
     VIDEO_RESOLUTION = (1000, 1000)
-    VIDEO_FPS = 30
+    VIDEO_FPS = 60
     VIDEO_DURATION = 1 # in seconds
 
     # Specify video codec
