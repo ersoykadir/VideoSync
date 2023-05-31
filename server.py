@@ -25,6 +25,7 @@ class SyncManager:
                 return 
             temp = {}
             for k,v in SyncManager().equations.items():
+                if('server' in k and k[0] != clients[0]): continue
                 if(len(v) == 0):
                     temp[k] = 0
                 else:
@@ -41,8 +42,12 @@ class SyncManager:
                 eqs.append(Eq(symbol_dict[k[0]] + symbol_dict[k[1]],v))
             
             solv = solve(eqs, s)
+            if(len(solv) == 0):
+                print('SyncManager solve error: No solution found')
+                return
 
             delays = {x: solv[symbol_dict[x]] for x in clients}
+            # delays['c3']= 1000
 
             m = min(delays.values())
 
@@ -58,11 +63,12 @@ class SyncManager:
 
     
     def update(self, sender_name: str, receiver_name: str, delay:float,):
+        print(f"SyncManager: {sender_name} -> {receiver_name} = {delay} ms")
         current_clients = sorted(Connection().connected_ips.inv.keys())
         current_clients.append('server')
 
         current_combs = combinations(current_clients, 2)
-        new_comers = set(current_combs) - set(self.current_delays.keys())
+        new_comers = set(current_combs) - set(self.equations.keys())
 
         for new_comer_tuple in new_comers:
             self.equations[new_comer_tuple] = []
@@ -72,7 +78,7 @@ class SyncManager:
 
         naming_tuple = (sender_name, receiver_name) if sender_name < receiver_name else (receiver_name, sender_name)
         if naming_tuple not in self.equations:
-            raise Exception('Ha Bu Kimdur, Hacen?'+ str(naming_tuple))
+            self.equations[naming_tuple] = []
         self.equations[naming_tuple].append(delay)
 
 
@@ -132,11 +138,10 @@ class Server:
         previous_delay = 0
         for client in Server().syncManager.current_delays.keys():
             if client == 'server': continue
-            send_packet(Connection().connected_ips.inv[client], Config().DATA_PORT, file_bytes)
             delay = previous_delay - Server().syncManager.current_delays[client]
             previous_delay = Server().syncManager.current_delays[client]
-            
             perfect_sleep.perfect_sleep(max(0, delay/1000))
+            send_packet(Connection().connected_ips.inv[client], Config().DATA_PORT, file_bytes)
 
     def stop_recording(self):
         self.currently_recording = False
