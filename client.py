@@ -16,6 +16,7 @@ class Client:
         self.__initialized = True
 
         self.media_player = vlc.MediaPlayer()
+        self.media_player.toggle_fullscreen()
         self.listen()
         # Thread(target=self.listen).start()
 
