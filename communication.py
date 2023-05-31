@@ -98,7 +98,8 @@ def tcp_listen():
 
 def send_probe(ip_of_client):
     s = 0
-    for i in range(3):
+    probe_count = 3
+    for i in range(probe_count):
         first_time = time.perf_counter()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip_of_client, Config().CONTROL_PORT))
@@ -107,7 +108,7 @@ def send_probe(ip_of_client):
         second_time = time.perf_counter()
         s += second_time - first_time
         time.sleep(0.1)
-    return s/3
+    return s/probe_count
 
 
 def sync_delay():
@@ -121,7 +122,7 @@ def sync_delay():
                 ip_of_client = Connection().connected_ips.inv[client_name]
                 avg = send_probe(ip_of_client)
                 me_to_client_delay = (avg)*1000/2
-                print(f"{client_name=} {me_to_client_delay=} in ms")
+                # print(f"{client_name=} {me_to_client_delay=} in ms")
 
                 # send to server if necessary
                 if Config().NAME == 'server':
@@ -130,7 +131,7 @@ def sync_delay():
                     send_to_server(client_name, me_to_client_delay)
         except Exception as e:
             print('sync_delay error', e)
-        if c%5 == 0:
+        if c % 10 == 0:
             Server().syncManager.solve()
         time.sleep(1)        
 

@@ -11,14 +11,18 @@ from connection import Connection
 from itertools import combinations
 
 from sympy import symbols, Eq, solve
-clients = ['c1','c2','server']
 
 class SyncManager:
-    current_delays = {x: 0 for x in clients}
-    equations = {x: [] for x in combinations(clients,2)}
+    current_delays = {}
+    equations = {}
 
     def solve(self):
         try:
+            clients = sorted(Connection().connected_ips.inv.keys())
+            clients.append('server')
+            if(len(clients) < 3):
+                print('SyncManager solve error: Not enough clients to solve sync equations')
+                return 
             temp = {}
             for k,v in SyncManager().equations.items():
                 if(len(v) == 0):
@@ -55,11 +59,16 @@ class SyncManager:
     
     def update(self, sender_name: str, receiver_name: str, delay:float,):
         current_clients = sorted(Connection().connected_ips.inv.keys())
+        current_clients.append('server')
+
         current_combs = combinations(current_clients, 2)
         new_comers = set(current_combs) - set(self.current_delays.keys())
-        for new_comer in new_comers:
-            self.equations[new_comer] = []
-            self.current_delays[new_comer] = 0
+
+        for new_comer_tuple in new_comers:
+            self.equations[new_comer_tuple] = []
+            for c in new_comer_tuple:
+                self.current_delays[c] = 0
+
 
         naming_tuple = (sender_name, receiver_name) if sender_name < receiver_name else (receiver_name, sender_name)
         if naming_tuple not in self.equations:
@@ -126,7 +135,8 @@ class Server:
             send_packet(Connection().connected_ips.inv[client], Config().DATA_PORT, file_bytes)
             delay = previous_delay - Server().syncManager.current_delays[client]
             previous_delay = Server().syncManager.current_delays[client]
-            time.sleep(delay)
+            
+            perfect_sleep.perfect_sleep(max(0, delay/1000))
 
     def stop_recording(self):
         self.currently_recording = False
