@@ -15,16 +15,17 @@ aleykumselam_template = {"type": "aleykumselam", "myname": Config().NAME}
 
 
 def udp_broadcast():
-    try:
-        print("Starting up, broadcasting hello message!")
-        message = json.dumps(hello_template)
-        broadcast_ip = ".".join(Config().MY_IP.split(".")[0:3]) + ".255"
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(("", 0))
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        sock.sendto(message.encode("utf-8"), (broadcast_ip, Config().CONTROL_PORT))
-    except Exception as e:
-        print("Udp broadcast failed!", e)
+    for i in range(5):
+        try:
+            print("Starting up, broadcasting hello message!")
+            message = json.dumps(hello_template)
+            broadcast_ip = ".".join(Config().MY_IP.split(".")[0:3]) + ".255"
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.bind(("", 0))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(message.encode("utf-8"), (broadcast_ip, Config().CONTROL_PORT))
+        except Exception as e:
+            print("Udp broadcast failed!", e)
 
 
 def udp_listen():
