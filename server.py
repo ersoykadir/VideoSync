@@ -141,7 +141,9 @@ class Server:
             delay = previous_delay - Server().syncManager.current_delays[client]
             previous_delay = Server().syncManager.current_delays[client]
             perfect_sleep.perfect_sleep(max(0, delay/1000))
+            t = time.perf_counter()
             send_packet(Connection().connected_ips.inv[client], Config().DATA_PORT, file_bytes)
+            previous_delay -= time.perf_counter() - t
 
     def stop_recording(self):
         self.currently_recording = False
