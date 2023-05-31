@@ -25,7 +25,7 @@ class SyncManager:
                 return 
             temp = {}
             for k,v in SyncManager().equations.items():
-                if('server' in k and k[0] != clients[0]): continue
+                if(len(clients) > 3 and 'server' in k and k[0] != clients[0]): continue
                 if(len(v) == 0):
                     temp[k] = 0
                 else:
