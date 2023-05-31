@@ -131,7 +131,7 @@ def sync_delay():
                     send_to_server(client_name, me_to_client_delay)
         except Exception as e:
             print('sync_delay error', e)
-        if c % 10 == 0:
+        if c % 10 == 0 and Config().NAME == 'server':
             Server().syncManager.solve()
         time.sleep(1)        
 
