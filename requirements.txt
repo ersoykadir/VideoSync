@@ -3,3 +3,4 @@ ffmpeg-python==0.2.0
 mss==9.0.1
 opencv-python==4.7.0.72
 Pillow==9.5.0
+sympy

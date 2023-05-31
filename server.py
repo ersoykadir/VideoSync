@@ -10,21 +10,61 @@ from utils import video_recorder,perfect_sleep, compress_video
 from connection import Connection
 from itertools import combinations
 
-clients = ['c1','c2','c3','server']
+from sympy import symbols, Eq, solve
+clients = ['c1','c2','server']
 
 class SyncManager:
-    client_delays = {}
+    current_delays = {x: 0 for x in clients}
     equations = {x: [] for x in combinations(clients,2)}
 
-    def solve():
-        pass
+    def solve(self):
+        try:
+            temp = {}
+            for k,v in SyncManager().equations.items():
+                if(len(v) == 0):
+                    temp[k] = 0
+                else:
+                    temp[k] = sum([float(m) for m in v])/len(v)            
+            
+            for k in self.equations.keys():
+                self.equations[k].clear()
+
+            s = symbols(' '.join(clients))
+            symbol_dict = {x: s[i] for i,x in enumerate(clients)}
+
+            eqs = []
+            for k,v in temp.items():    
+                eqs.append(Eq(symbol_dict[k[0]] + symbol_dict[k[1]],v))
+            
+            solv = solve(eqs, s)
+
+            delays = {x: solv[symbol_dict[x]] for x in clients}
+
+            m = min(delays.values())
+
+            if(m < 0):
+                for i,k in enumerate(delays.keys()):
+                    delays[k] -= m
+
+            self.current_delays = dict(sorted(delays.items(), key=lambda x: x[1], reverse=True))
+
+            print(self.current_delays)
+        except Exception as e:
+            print('SyncManager solve error', e)
+
     
     def update(self, sender_name: str, receiver_name: str, delay:float,):
+        current_clients = sorted(Connection().connected_ips.inv.keys())
+        current_combs = combinations(current_clients, 2)
+        new_comers = set(current_combs) - set(self.current_delays.keys())
+        for new_comer in new_comers:
+            self.equations[new_comer] = []
+            self.current_delays[new_comer] = 0
+
         naming_tuple = (sender_name, receiver_name) if sender_name < receiver_name else (receiver_name, sender_name)
         if naming_tuple not in self.equations:
-            raise Exception('Ha Bu Kimdur, Hacen?', str(naming_tuple))
+            raise Exception('Ha Bu Kimdur, Hacen?'+ str(naming_tuple))
         self.equations[naming_tuple].append(delay)
-
 
 
 class Server:
@@ -48,6 +88,7 @@ class Server:
         self.currently_recording = True
 
     def start_recording(self):
+
         if Server().currently_recording:
             print("Server:","\tAlready recording!")
             return
@@ -71,9 +112,7 @@ class Server:
             
             
     def send_video_to_users(self, recorded_file):
-        # perfect_sleep.perfect_sleep(2) # wait for 1 second and check again
-        s = time.perf_counter()
-        time.sleep(1)
+        time.sleep(0.5)
         print(time.perf_counter()-Server().last)
         Server().last = time.perf_counter()
 
@@ -81,8 +120,13 @@ class Server:
         file_bytes = f.read()
         f.close()
 
-        for ip in Connection().connected_ips.keys():
-            send_packet(ip, Config().DATA_PORT, file_bytes)
+        previous_delay = 0
+        for client in Server().syncManager.current_delays.keys():
+            if client == 'server': continue
+            send_packet(Connection().connected_ips.inv[client], Config().DATA_PORT, file_bytes)
+            delay = previous_delay - Server().syncManager.current_delays[client]
+            previous_delay = Server().syncManager.current_delays[client]
+            time.sleep(delay)
 
     def stop_recording(self):
         self.currently_recording = False

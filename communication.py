@@ -79,6 +79,7 @@ def tcp_listen():
                         client_name = Connection().connected_ips[sender_ip]
                         _, receiver_name, delay = message.split('#')
                         Server().syncManager.update(client_name, receiver_name, delay)
+                        continue
                     try:
                         message = json.loads(message)
                     except:
@@ -95,23 +96,31 @@ def tcp_listen():
                 print("What the hack is this, tcp?", str(e))
                 continue
 
+def send_probe(ip_of_client):
+    s = 0
+    for i in range(3):
+        first_time = time.perf_counter()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((ip_of_client, Config().CONTROL_PORT))
+        sock.sendall("_".encode()) # message does not matter
+        _ = sock.recv(1024)
+        second_time = time.perf_counter()
+        s += second_time - first_time
+        time.sleep(0.1)
+    return s/3
+
 
 def sync_delay():
+    c = 0
     while True:
+        c+=1
         try:
             for client_name in Connection().connected_ips.inv.keys():
-                if client_name == 'server': continue
+                if client_name == 'server': continue # everybody sends everbody except no one probes the server
 
                 ip_of_client = Connection().connected_ips.inv[client_name]
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect((ip_of_client, Config().CONTROL_PORT))
-                
-                first_time = time.time()
-                sock.sendall("_".encode() * 10240) # message does not matter
-                _ = sock.recv(1024)
-                second_time = time.time()
-                me_to_client_delay = (second_time - first_time)*1000/2
-
+                avg = send_probe(ip_of_client)
+                me_to_client_delay = (avg)*1000/2
                 print(f"{client_name=} {me_to_client_delay=} in ms")
 
                 # send to server if necessary
@@ -120,14 +129,16 @@ def sync_delay():
                 else:
                     send_to_server(client_name, me_to_client_delay)
         except Exception as e:
-            continue
-        time.sleep(5)
+            print('sync_delay error', e)
+        if c%5 == 0:
+            Server().syncManager.solve()
+        time.sleep(1)        
 
 def send_to_server(other, delay):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if 'server' not in Connection().connected_ips.inv.keys():
         raise Exception('Server is not connected!')
-    sock.connect((Connection().connected_ips['server'], Config().CONTROL_PORT))
+    sock.connect((Connection().connected_ips.inv['server'], Config().CONTROL_PORT))
     sock.sendall(f"#{other}#{delay}".encode()) # message does not matter
 
 def udp_broadcast_interval():
@@ -148,4 +159,4 @@ def startup():
     udp_broadcast_thread.start()
 
     sync_delay_thread = Thread(target=sync_delay)
-    # sync_delay_thread.start()
+    sync_delay_thread.start()
