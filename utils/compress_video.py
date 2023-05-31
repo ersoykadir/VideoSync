@@ -1,17 +1,23 @@
 import ffmpeg
 from config import Config
+
+def get_compress_name(filename: str):
+    k = filename.replace(Config().FILE_EXTENSION, "")# replace .mp4 extension if it exists
+    return f"{k}_comp{Config().FILE_EXTENSION}"
+
 def compress(filename: str):
-    filename.replace(Config().FILE_EXTENSION, "") # replace .mp4 extension if it exists
-    compressed_filename = f"{filename}_comp{Config().FILE_EXTENSION}"
+    compress_video = get_compress_name(filename)
     (ffmpeg
         .input(filename)
         .output(
-            compressed_filename,
-            crf=30,
+            compress_video,
+            crf=35,
             vcodec="libx264",
             preset='superfast',
             loglevel='quiet',
         )
-        .run()
+        .run(
+        overwrite_output=True
     )
-    return compressed_filename
+)
+    return compress_video

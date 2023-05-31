@@ -3,3 +3,4 @@ venv/
 temp/
 .vscode/
 *.dll
+.DS_Store

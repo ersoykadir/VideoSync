@@ -73,6 +73,9 @@ def tcp_listen():
                         conn.sendall("_".encode())
                         continue
                     if message[0] == '#': # client has send a probe data
+                        if Config().NAME != 'server': 
+                            print('Go away!')
+                            continue
                         client_name = Connection().connected_ips[sender_ip]
                         _, receiver_name, delay = message.split('#')
                         Server().syncManager.update(client_name, receiver_name, delay)
@@ -104,7 +107,7 @@ def sync_delay():
                 sock.connect((ip_of_client, Config().CONTROL_PORT))
                 
                 first_time = time.time()
-                sock.sendall("_".encode()) # message does not matter
+                sock.sendall("_".encode() * 10240) # message does not matter
                 _ = sock.recv(1024)
                 second_time = time.time()
                 me_to_client_delay = (second_time - first_time)*1000/2
@@ -116,15 +119,17 @@ def sync_delay():
                     Server().syncManager.update('server', client_name, me_to_client_delay)
                 else:
                     send_to_server(client_name, me_to_client_delay)
-                    
-
-
         except Exception as e:
             continue
         time.sleep(5)
 
-def send_to_server(me, other, delay):
-    pass
+def send_to_server(other, delay):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if 'server' not in Connection().connected_ips.inv.keys():
+        raise Exception('Server is not connected!')
+    sock.connect((Connection().connected_ips['server'], Config().CONTROL_PORT))
+    sock.sendall(f"#{other}#{delay}".encode()) # message does not matter
+
 def udp_broadcast_interval():
     while True:
         udp_broadcast()
@@ -143,4 +148,4 @@ def startup():
     udp_broadcast_thread.start()
 
     sync_delay_thread = Thread(target=sync_delay)
-    sync_delay_thread.start()
+    # sync_delay_thread.start()

@@ -6,11 +6,11 @@ from threading import Thread
 from utils.send_packet import send_packet
 
 from config import Config
-from utils import video_recorder,perfect_sleep
+from utils import video_recorder,perfect_sleep, compress_video
 from connection import Connection
 from itertools import combinations
 
-clients = ['c1','c2','server']
+clients = ['c1','c2','c3','server']
 
 class SyncManager:
     client_delays = {}
@@ -66,13 +66,14 @@ class Server:
                 continue
 
             recorded_file = video_recorder.record()
+            if Config().COMPRESSION_ENABLED: recorded_file =compress_video.get_compress_name(recorded_file)
             Thread(target=Server().send_video_to_users, args=(recorded_file,)).start()
             
             
     def send_video_to_users(self, recorded_file):
         # perfect_sleep.perfect_sleep(2) # wait for 1 second and check again
         s = time.perf_counter()
-        time.sleep(0.5)
+        time.sleep(1)
         print(time.perf_counter()-Server().last)
         Server().last = time.perf_counter()
 

@@ -14,8 +14,11 @@ class Config:
     CONTROL_PORT = 12345 # for sa and as
     DATA_PORT = 12346 # for video stream
 
-    VIDEO_RESOLUTION = (1000, 1000)
-    VIDEO_FPS = 60
+    # VIDEO_RESOLUTION = (854, 480)
+    VIDEO_RESOLUTION = (1280, 720)
+    # SCREENSHOT_RESOLUTION = (1280, 720)
+    SCREENSHOT_RESOLUTION = (1920, 1080)
+    VIDEO_FPS = 30
     VIDEO_DURATION = 1 # in seconds
 
     # Specify video codec
@@ -23,7 +26,7 @@ class Config:
     FILE_EXTENSION = ".mp4"
     COMPRESSION_ENABLED = False
 
-    NAME = 'c1'
+    NAME = 'server'
 
     TEMP_DIR = "temp"
     MY_IP = None

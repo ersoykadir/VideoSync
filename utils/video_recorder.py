@@ -21,11 +21,14 @@ def saver(queue, filename):
 		out.write(frame)
 	out.release()
 
+	if Config().COMPRESSION_ENABLED:
+		compress_video.compress(filename)
+
 def record(fps = Config().VIDEO_FPS):
 	filename = f"{Config().TEMP_DIR}/{time.time()}{Config().FILE_EXTENSION}"
 	
 	sct = mss()
-	bounding_box = {'top': 0, 'left': 0, 'width': Config().VIDEO_RESOLUTION[0], 'height': Config().VIDEO_RESOLUTION[1]}
+	bounding_box = {'top': 0, 'left': 0, 'width': Config().SCREENSHOT_RESOLUTION[0], 'height': Config().SCREENSHOT_RESOLUTION[1]}
 	
 	counter = 0
 
@@ -43,15 +46,14 @@ def record(fps = Config().VIDEO_FPS):
 		sct_img = sct.grab(bounding_box)
 		sct_img = np.array(sct_img, dtype=np.uint8)
 
-		frame = cv2.cvtColor(sct_img, cv2.COLOR_RGB2BGR)
+		frame = cv2.cvtColor(sct_img, cv2.COLOR_BGRA2BGR)
+		frame = cv2.resize(frame, Config().VIDEO_RESOLUTION)
 		q.put(frame)
 		# out.write(frame)
 
 		frame_duration = time.perf_counter() - frame_start_time
 		perfect_sleep(1/fps - frame_duration)
 	q.put(None)
-
-	if Config().COMPRESSION_ENABLED: filename = compress_video.compress(filename)
 
 	print(f"Total time elapsed: {time.perf_counter() - first_time} seconds")
 	return filename
