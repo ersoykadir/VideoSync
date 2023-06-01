@@ -3,7 +3,7 @@ import select
 import socket
 import time
 from threading import Thread
-
+import os
 from config import Config
 from connection import Connection
 from server import Server
@@ -149,6 +149,18 @@ def udp_broadcast_interval():
         return
         time.sleep(60)
 
+def cleaner():
+    while True:
+        t = time.time()
+        files = os.listdir('temp')
+        for file in files:
+            if file[-4:] != Config().FILE_EXTENSION: continue
+            file_time = file.split(Config().FILE_EXTENSION)[0]
+            if  t - float(file_time) > 60:
+                os.remove(f'temp/{file}')
+        time.sleep(60) # every minute
+
+
 def startup():
     # Send hello message to all ips on the LAN
     tcp_thread = Thread(target=tcp_listen)
@@ -162,3 +174,7 @@ def startup():
 
     sync_delay_thread = Thread(target=sync_delay)
     sync_delay_thread.start()
+
+    cleaner_thread = Thread(target=cleaner)
+    cleaner_thread.start()
+
